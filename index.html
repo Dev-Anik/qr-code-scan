@@ -15,6 +15,7 @@
             height: 100vh;
             box-sizing: border-box;
             text-align: center;
+            background-color: #6e9db8ad;
         }
 
         .fade-out {
@@ -22,37 +23,20 @@
         }
 
         .container {
-            width: 100%;
-            max-width: 500px;
+            width: 300px;
             margin: 5px;
         }
 
-        .container h1 {
-            color: #ffffff;
+        .top-img {
+            margin-top: 4rem;
+            width: 70%;
+            text-align: center;
         }
 
-        .section {
-            background-color: #ffffff;
-            padding: 50px 30px;
-            border: 1.5px solid #b2b2b2;
-            border-radius: 0.25em;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25);
+        #reader {
+            border: none !important;
         }
 
-        #my-qr-reader {
-            padding: 20px !important;
-            border: 1.5px solid #b2b2b2 !important;
-            border-radius: 8px;
-        }
-
-        #my-qr-reader img[alt="Info icon"] {
-            display: none;
-        }
-
-        #my-qr-reader img[alt="Camera based scan"] {
-            width: 100px !important;
-            height: 100px !important;
-        }
 
         button {
             padding: 10px 20px;
@@ -88,7 +72,8 @@
 <body>
 
     <div class="container">
-        <div>
+        <img class="top-img" src="image/qrcode.png" alt="">
+        <div id="qr-btn">
             <button onclick="qrSection()">
                 バーコード・QRコード
             </button>
@@ -103,44 +88,29 @@
 
 
     <script>
-        function qrSection(){
+        function qrSection() {
             document.getElementById('qrbar').classList.remove('fade-out');
+            document.getElementById('qr-btn').classList.add('fade-out');
             domReady();
         }
-     
+
         function domReady() {
-        const scanner = new Html5QrcodeScanner('reader', {
-            qrbox: {
-                width: 300,
-                height: 300,
-            },
-            fps: 20
-        });
-        scanner.render(success)
-        function success(result) {
-            let stopBtn=document.getElementById('html5-qrcode-button-camera-stop');
-            stopBtn.click();
-            alert(result);
-        }
-    };
-        // function qrSection() {
-        //     document.querySelector('.qr-sec').classList.remove("fade-out");
-        // }
-        
-
-        // domReady(function () {
-
-        //     // If found you qr code
-        //     function onScanSuccess(decodeText, decodeResult) {
-        //         alert("You Qr is : " + decodeText, decodeResult);
-        //     }
-
-        //     let htmlscanner = new Html5QrcodeScanner(
-        //         "my-qr-reader",
-        //         { fps: 10, qrbos: 250 }
-        //     );
-        //     htmlscanner.render(onScanSuccess);
-        // });
+            const scanner = new Html5QrcodeScanner('reader', {
+                qrbox: {
+                    width: 300,
+                    height: 300,
+                },
+                fps: 20
+            });
+            scanner.render(success)
+            function success(result) {
+                let stopBtn = document.getElementById('html5-qrcode-button-camera-stop');
+                stopBtn.click();
+                alert(result);
+                document.getElementById('qrbar').classList.add('fade-out');
+                document.getElementById('qr-btn').classList.remove('fade-out');
+            }
+        };
     </script>
 </body>
 

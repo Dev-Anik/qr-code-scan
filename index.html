@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR & Barcode Scanner</title>
+    <title>QR Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body {
             display: flex;
@@ -14,7 +15,10 @@
             height: 100vh;
             box-sizing: border-box;
             text-align: center;
-            background: rgb(128 0 0 / 66%);
+        }
+
+        .fade-out {
+            display: none;
         }
 
         .container {
@@ -84,40 +88,59 @@
 <body>
 
     <div class="container">
-        <h1>Scan QR Codes</h1>
-        <div class="section">
-            <div id="my-qr-reader">
+        <div>
+            <button onclick="qrSection()">
+                バーコード・QRコード
+            </button>
+        </div>
+        <div id="qrbar" class="fade-out">
+            <div id="reader">
             </div>
+            <div id="result"></div>
         </div>
     </div>
 
 
-    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <script>
-        function domReady(fn) {
-            if (
-                document.readyState === "complete" ||
-                document.readyState === "interactive"
-            ) {
-                setTimeout(fn, 1000);
-            } else {
-                document.addEventListener("DOMContentLoaded", fn);
-            }
+        function qrSection(){
+            document.getElementById('qrbar').classList.remove('fade-out');
+            domReady();
         }
-
-        domReady(function () {
-
-            // If found you qr code
-            function onScanSuccess(decodeText, decodeResult) {
-                alert("You Qr is : " + decodeText, decodeResult);
-            }
-
-            let htmlscanner = new Html5QrcodeScanner(
-                "my-qr-reader",
-                { fps: 10, qrbos: 250 }
-            );
-            htmlscanner.render(onScanSuccess);
+     
+        function domReady() {
+        const scanner = new Html5QrcodeScanner('reader', {
+            qrbox: {
+                width: 300,
+                height: 300,
+            },
+            fps: 20
         });
+        scanner.render(success)
+        function success(result) {
+            let stopBtn=document.getElementById('html5-qrcode-button-camera-stop');
+            stopBtn.click();
+            alert(result);
+        }
+    };
+        // function qrSection() {
+        //     document.querySelector('.qr-sec').classList.remove("fade-out");
+        // }
+        
+
+        // domReady(function () {
+
+        //     // If found you qr code
+        //     function onScanSuccess(decodeText, decodeResult) {
+        //         alert("You Qr is : " + decodeText, decodeResult);
+        //     }
+
+        //     let htmlscanner = new Html5QrcodeScanner(
+        //         "my-qr-reader",
+        //         { fps: 10, qrbos: 250 }
+        //     );
+        //     htmlscanner.render(onScanSuccess);
+        // });
     </script>
 </body>
 

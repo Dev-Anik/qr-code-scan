@@ -4,113 +4,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Barcode Scanner</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            box-sizing: border-box;
-            text-align: center;
-            background-color: #6e9db8ad;
-        }
-
-        .fade-out {
-            display: none;
-        }
-
-        .container {
-            width: 300px;
-            margin: 5px;
-        }
-
-        .top-img {
-            margin-top: 4rem;
-            width: 70%;
-            text-align: center;
-        }
-
-        #reader {
-            border: none !important;
-        }
-
-
-        button {
-            padding: 10px 20px;
-            border: 1px solid #b2b2b2;
-            outline: none;
-            border-radius: 0.25em;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            background-color: #008000ad;
-            transition: 0.3s background-color;
-        }
-
-        button:hover {
-            background-color: #008000;
-        }
-
-        #html5-qrcode-anchor-scan-type-change {
-            text-decoration: none !important;
-            color: #1d9bf0;
-        }
-
-        video {
-            width: 100% !important;
-            border: 1px solid #b2b2b2 !important;
-            border-radius: 0.25em;
-        }
-    </style>
+    <title>QR and Barcode Scanner</title>
 </head>
 
 <body>
+    <button id="scanButton">Scan QR/Barcode</button>
+    <div id="result"></div>
 
-    <div class="container">
-        <img class="top-img" src="image/qrcode.png" alt="">
-        <div id="qr-btn">
-            <button onclick="qrSection()">
-                バーコード・QRコード
-            </button>
-        </div>
-        <div id="qrbar" class="fade-out">
-            <div id="reader">
-            </div>
-            <div id="result"></div>
-        </div>
-    </div>
-
-
-
+    <!-- Include libraries -->
+    <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
     <script>
-        function qrSection() {
-            document.getElementById('qrbar').classList.remove('fade-out');
-            document.getElementById('qr-btn').classList.add('fade-out');
-            domReady();
+        document.getElementById('scanButton').addEventListener('click', function () {
+            scanQRBarcode();
+        });
+
+        function scanQRBarcode() {
+            // Access the camera
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(function (stream) {
+                    // Create a video element to display the camera stream
+                    var video = document.createElement('video');
+                    document.body.appendChild(video);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // required to tell iOS safari we don't want fullscreen
+                    video.play();
+
+                    // Listen for the video to be ready to start scanning
+                    video.onloadedmetadata = function () {
+                        // Start scanning
+                        scan(video);
+                    };
+                })
+                .catch(function (err) {
+                    console.error('Error accessing the camera.', err);
+                });
         }
 
-        function domReady() {
-            const scanner = new Html5QrcodeScanner('reader', {
-                qrbox: {
-                    width: 300,
-                    height: 300,
-                },
-                fps: 20
-            });
-            scanner.render(success)
-            function success(result) {
-                let stopBtn = document.getElementById('html5-qrcode-button-camera-stop');
-                stopBtn.click();
-                alert(result);
-                document.getElementById('qrbar').classList.add('fade-out');
-                document.getElementById('qr-btn').classList.remove('fade-out');
-            }
-        };
+        function scan(video) {
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            var scanInterval = setInterval(function () {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    // Draw the current video frame onto the canvas
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Get the image data from the canvas
+                    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (code) {
+                        clearInterval(scanInterval); // Stop scanning
+                        document.getElementById('result').innerText = 'Result: ' + code.data; // Display the result
+                    }
+                }
+            }, 100);
+        }
     </script>
 </body>
 

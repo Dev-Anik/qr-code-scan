@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR and Barcode Scanner</title>
 </head>
-
 <body>
     <button id="scanButton">Scan QR/Barcode</button>
     <div id="result"></div>
 
     <!-- Include libraries -->
-    <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
     <script>
         document.getElementById('scanButton').addEventListener('click', function () {
@@ -20,51 +17,32 @@
         });
 
         function scanQRBarcode() {
-            // Access the camera
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then(function (stream) {
-                    // Create a video element to display the camera stream
-                    var video = document.createElement('video');
-                    document.body.appendChild(video);
-                    video.srcObject = stream;
-                    video.setAttribute('playsinline', true); // required to tell iOS safari we don't want fullscreen
-                    video.play();
-
-                    // Listen for the video to be ready to start scanning
-                    video.onloadedmetadata = function () {
-                        // Start scanning
-                        scan(video);
-                    };
-                })
-                .catch(function (err) {
-                    console.error('Error accessing the camera.', err);
-                });
-        }
-
-        function scan(video) {
-            var canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            var scanInterval = setInterval(function () {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    // Draw the current video frame onto the canvas
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    // Get the image data from the canvas
-                    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    var code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                    if (code) {
-                        clearInterval(scanInterval); // Stop scanning
-                        document.getElementById('result').innerText = 'Result: ' + code.data; // Display the result
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#result'),
+                    constraints: {
+                        facingMode: "environment"
                     }
+                },
+                decoder: {
+                    readers: ["ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
                 }
-            }, 100);
+            }, function (err) {
+                if (err) {
+                    console.error('Failed to initialize Quagga:', err);
+                    return;
+                }
+                console.log('Initialization finished. Ready to start');
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function (data) {
+                document.getElementById('result').innerText = 'Result: ' + data.codeResult.code;
+                Quagga.stop();
+            });
         }
     </script>
 </body>
-
 </html>

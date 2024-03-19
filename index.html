@@ -20,7 +20,7 @@
     <h1>QR & Barcode Scanner</h1>
     <div id="reader"></div>
     <script>
-        document.addEventListener("DOMContentLoaded", function (event) {
+        
             const html5QrCode = new Html5Qrcode('reader');
 
             function onScanSuccess(qrCodeMessage) {
@@ -38,7 +38,6 @@
                 onScanSuccess,
                 onScanError
             );
-        });
     </script>
 </body>
 

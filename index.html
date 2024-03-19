@@ -1,48 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR and Barcode Scanner</title>
-</head>
-<body>
-    <button id="scanButton">Scan QR/Barcode</button>
-    <div id="result"></div>
-
-    <!-- Include libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
-    <script>
-        document.getElementById('scanButton').addEventListener('click', function () {
-            scanQRBarcode();
-        });
-
-        function scanQRBarcode() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#result'),
-                    constraints: {
-                        facingMode: "environment"
-                    }
-                },
-                decoder: {
-                    readers: ["ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
-                }
-            }, function (err) {
-                if (err) {
-                    console.error('Failed to initialize Quagga:', err);
-                    return;
-                }
-                console.log('Initialization finished. Ready to start');
-                Quagga.start();
-            });
-
-            Quagga.onDetected(function (data) {
-                document.getElementById('result').innerText = 'Result: ' + data.codeResult.code;
-                Quagga.stop();
-            });
+    <title>QR & Barcode Scanner</title>
+    <!-- Include Html5Qrcode library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        #reader {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
         }
+    </style>
+</head>
+
+<body>
+    <h1>QR & Barcode Scanner</h1>
+    <div id="reader"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const html5QrCode = new Html5Qrcode('reader');
+
+            function onScanSuccess(qrCodeMessage) {
+                console.log(`QR Code detected: ${qrCodeMessage}`);
+                alert(`QR Code detected: ${qrCodeMessage}`);
+            }
+
+            function onScanError(errorMessage) {
+                console.log(`QR Code scan error: ${errorMessage}`);
+            }
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Use the back camera by default
+                { fps: 10, qrbox: 250 },
+                onScanSuccess,
+                onScanError
+            );
+        });
     </script>
 </body>
+
 </html>
